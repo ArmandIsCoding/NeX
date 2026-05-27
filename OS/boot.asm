@@ -10,7 +10,8 @@ mov sp, bp
 
 ; --- LEER DEL DISCO ---
 mov ah, 0x02                ; Función BIOS: Leer sectores del disco
-mov al, 1                   ; Cantidad de sectores que queremos leer (1 sector = 512 bytes)
+;mov al, 1                   ; Cantidad de sectores que queremos leer (1 sector = 512 bytes)
+mov al, 16                  ; Leemos 16 sectores para asegurarnos el Stage 2 completo
 mov ch, 0                   ; Cilindro 0
 mov dh, 0                   ; Cabeza 0
 mov cl, 2                   ; Sector 2 (El sector 1 es este Bootloader, el 2 es el que queremos)
