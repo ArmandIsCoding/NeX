@@ -1,12 +1,26 @@
 [org 0x9000]
 bits 16                     ; Iniciamos en 16 bits (Modo Real)
 
+; Aseguramos DS = 0 para el adresamiento correcto
+xor ax, ax
+mov ds, ax
+
 ; ---------------------------------------------------------------------------
 ; STAGE 2: Inicialización y Salto a Modo Protegido (32-bits)
 ; ---------------------------------------------------------------------------
 mov ah, 0x0e
 mov al, '2'                 ; Indicador visual de Stage 2 activo
 int 0x10
+
+; Guardar número de disco (DL viene del Stage 1)
+mov [boot_drive_s2], dl
+
+; --- CARGAR EL KERNEL DESDE EL DISCO A 0x10000 ---
+; Usamos lectura extendida (LBA) para mayor compatibilidad
+mov ah, 0x42                ; Función extendida de lectura
+mov si, kernel_dap          ; DS:SI → Disk Address Packet
+int 0x13
+jc error_kernel
 
 cli                         ; Desactivar interrupciones
 lgdt [gdt_descriptor]       ; Cargar GDT inicial
@@ -17,8 +31,12 @@ mov cr0, eax
 
 jmp 0x08:iniciar_modo_protegido ; Salto largo para aplicar los 32-bits
 
-; ---------------------------------------------------------------------------
-; STAGE 2: Modo Protegido de 32 bits - Configurando la Paginación de 64 bits
+error_kernel:
+    mov ah, 0x0e
+    mov al, 'K'             ; Imprime 'K' si falla la carga del Kernel
+    int 0x10
+    jmp $
+
 ; ---------------------------------------------------------------------------
 bits 32
 
@@ -97,11 +115,27 @@ iniciar_modo_largo:
     mov word [rdi + 8], 0x1f36  ; '6'
     mov word [rdi + 10], 0x1f34 ; '4'
 
-    jmp $
+    ; --- EL GRAN SALTO A C ---
+    ; Saltamos a la dirección física 0x10000, mapeada en nuestro linker.ld
+    mov rax, 0x10000
+    jmp rax
+
+    jmp $                        ; Flag de seguridad por si C retorna (no debería)
 
 ; ---------------------------------------------------------------------------
 ; TABLAS DE DATOS Y DESCRIPTORES
 ; ---------------------------------------------------------------------------
+
+boot_drive_s2: db 0
+
+; Disk Address Packet (DAP) para cargar el Kernel desde LBA 17
+kernel_dap:
+    db 0x10             ; Tamaño del paquete (16 bytes)
+    db 0x00             ; Reservado
+    dw 16               ; Sectores a leer (16 × 512 = 8KB)
+    dw 0x0000           ; Offset destino
+    dw 0x1000           ; Segmento destino (0x1000 × 16 = físico 0x10000)
+    dq 17               ; LBA de inicio del Kernel en el disco
 
 ; --- GDT de 16/32 bits ---
 gdt_start:
@@ -128,3 +162,5 @@ gdt64_end:
 gdt64_descriptor:
     dw gdt64_end - gdt64_start - 1
     dq gdt64_start
+
+times 8192 - ($ - $$) db 0  ; Fuerza a que el Stage 2 mida exactamente 16 sectores

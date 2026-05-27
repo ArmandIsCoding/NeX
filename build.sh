@@ -1,24 +1,40 @@
 #!/bin/bash
 
-# Detener si algo falla
+# Detener el script si algún comando falla
 set -e
 
-echo "🔨 Compilando NeX OS... (y de paso, haciendo historia)"
+echo "🔨 Compilando NeX OS... (Redireccionando binarios a /bin)"
 
-# 1. Compilar Stage 1 y Stage 2
-nasm -f bin OS/boot.asm -o OS/boot.bin
-nasm -f bin OS/boot_stage2.asm -o OS/kernel.bin
+# Asegurar que la carpeta bin exista por seguridad
+mkdir -p bin
 
-# 2. Crear un disco virtual en blanco de 64KB lleno de ceros (128 bloques de 512 bytes)
+# 1. Compilar Stage 1 (Bootloader) -> directo a /bin
+nasm -f bin OS/boot.asm -o bin/boot.bin
+
+# 2. Compilar Stage 2 (Modo Protegido / Paginación / Long Mode) -> directo a /bin
+nasm -f bin OS/boot_stage2.asm -o bin/boot_stage2.bin
+
+# 3. Compilar Stage 3 (Kernel en C puro de 64 bits)
+x86_64-elf-gcc -ffreestanding -mno-red-zone -m64 -c OS/kernel.c -o bin/kernel.o
+
+# 4. Enlazar el objeto de C usando nuestro linker.ld para generar el binario plano del Kernel
+x86_64-elf-ld -T OS/linker.ld bin/kernel.o -o bin/kernel.bin
+
+echo "💾 Estructurando imagen de disco unificada..."
+
+# 5. Crear un disco virtual limpio lleno de ceros (64KB de tamaño)
 dd if=/dev/zero of=nexos.img bs=512 count=128 status=none
 
-# 3. Insertar el Stage 1 en el sector 0 (sin truncar el resto del archivo)
-dd if=OS/boot.bin of=nexos.img conv=notrunc bs=512 count=1 status=none
+# 6. Insertar Stage 1 (Sector 0)
+dd if=bin/boot.bin of=nexos.img conv=notrunc bs=512 count=1 status=none
 
-# 4. Insertar el Stage 2 a partir del sector 1 (justo después del bootloader)
-dd if=OS/kernel.bin of=nexos.img seek=1 conv=notrunc bs=512 status=none
+# 7. Insertar Stage 2 (A partir del Sector 1)
+dd if=bin/boot_stage2.bin of=nexos.img seek=1 conv=notrunc bs=512 status=none
+
+# 8. Insertar Stage 3 (Nuestro Kernel en C a partir del Sector 17)
+dd if=bin/kernel.bin of=nexos.img seek=17 conv=notrunc bs=512 status=none
 
 echo "🚀 Lanzando NeX OS en QEMU..."
 
-# 5. Ejecutar el emulador
-qemu-system-x86_64 -drive format=raw,file=nexos.img
+# 9. Ejecutar el emulador (-no-reboot evita el bucle infinito si hay un fallo)
+qemu-system-x86_64 -drive format=raw,file=nexos.img -no-reboot

@@ -57,9 +57,9 @@ Asegurate de que el script tenga permisos de ejecución (`chmod +x build.sh`) y 
 ## 🗺️ Mapa de Ruta (Roadmap)
 
 * **[x] Stage 1:** Bootloader básico de 512 bytes e inicialización en Modo Real.
-* **[x] Stage 2:** Romper el límite físico cargando el código extendido de **Boot Stage 2** desde el disco.
-* **[ ] Transition:** Configurar GDT y Paginación dentro de Stage 2 para conmutar la CPU a 64 bits.
-* **[ ] Stage 3:** Carga del **Kernel definitivo (`kernel.c`)** en C puro de 64 bits.
+* **[x] Stage 2:** Carga de Boot Stage 2 desde disco. Configura GDT, habilita PAE y activa Long Mode, montando paginación de 64 bits con página gigante de 2MB.
+* **[x] Transition:** Salto a 64 bits con nueva GDT exclusiva, inicialización de segmentos y limpieza de pantalla VGA con fondo azul.
+* **[x] Stage 3:** Kernel (`kernel.c`) en C puro de 64 bits cargado en `0x10000` vía lectura extendida LBA. Imprime mensaje por VGA y entra en bucle infinito.
 
 ---
 
