@@ -1,4 +1,4 @@
-# NeX 🌌
+# NeX OS
 
 > *"The people who are crazy enough to think they can change the world are the ones who do."* — Steve Jobs
 
@@ -10,7 +10,7 @@ NeX es un lienzo en blanco para explorar la gestión de memoria, los registros d
 
 ---
 
-## ⚡ El Espíritu de NeX
+## ⚡ El Espíritu de NeX OS
 
 * **Brutalmente Rápido:** Sin peso muerto, sin telemetría, sin capas innecesarias. Solo el código y el silicio.
 * **Didáctico por Naturaleza:** Diseñado para ser leído, roto, modificado y comprendido bit a bit.
