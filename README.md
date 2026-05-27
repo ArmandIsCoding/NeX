@@ -1,8 +1,3 @@
-# NeX
-A minimalist, brutally fast, and educational OS built on the shoulders of giants, drawing inspiration from NeXTSTEP history.
-
----
-
 # NeX 🌌
 
 > *"The people who are crazy enough to think they can change the world are the ones who do."* — Steve Jobs
@@ -17,9 +12,9 @@ NeX es un lienzo en blanco para explorar la gestión de memoria, los registros d
 
 ## ⚡ El Espíritu de NeX
 
-*   **Brutalmente Rápido:** Sin peso muerto, sin telemetría, sin capas innecesarias. Solo el código y el silicio.
-*   **Didáctico por Naturaleza:** Diseñado para ser leído, roto, modificado y comprendido bit a bit.
-*   **Mística de Garage:** Código con alma. Hecho por la diversión de domar el hardware y revivir la era dorada de la informática donde el software se sentía artesanal.
+* **Brutalmente Rápido:** Sin peso muerto, sin telemetría, sin capas innecesarias. Solo el código y el silicio.
+* **Didáctico por Naturaleza:** Diseñado para ser leído, roto, modificado y comprendido bit a bit.
+* **Mística de Garage:** Código con alma. Hecho por la diversión de domar el hardware y revivir la era dorada de la informática donde el software se sentía artesanal.
 
 ## 🧠 Inspiración Histórica
 
@@ -29,7 +24,67 @@ En 1985, fuera de Apple, Jobs fundó NeXT con la premisa de crear computadoras a
 
 ---
 
+## 🛠️ Requisitos Previos (Para macOS / Apple Silicon M4)
+
+Dado que estamos compilando desde un chip con arquitectura ARM64 pero apuntamos a una arquitectura destino x86_64 de 64 bits (*Bare-Metal*), necesitamos un entorno de compilación cruzada (*Cross-Compiler*).
+
+Instalá las herramientas necesarias usando **Homebrew**:
+
+```bash
+brew install nasm qemu x86_64-elf-gcc
+
+```
+
+* `nasm`: El ensamblador para traducir nuestro código x86 a binario puro.
+* `qemu`: El emulador de hardware hiperrápido para testear el OS de forma segura.
+* `x86_64-elf-gcc`: Compilador de C puro optimizado para generar ejecutables limpios sin dependencias de macOS ni de Linux.
+
+---
+
+## 🚀 Cómo Compilar y Ejecutar
+
+Para ensamblar los sectores, unificar nuestro disco virtual y arrancar **NeX OS**, ejecutá la siguiente secuencia en tu terminal:
+
+### 1. Compilar los componentes base
+
+```bash
+# Compilar el Sector 1 (Bootloader de 512 bytes en Modo Real 16-bits)
+nasm -f bin boot.asm -o boot.bin
+
+# Compilar el Sector 2 (Trampolín hacia el Kernel y Modo Protegido)
+nasm -f bin kernel_trampoline.asm -o kernel.bin
+
+```
+
+### 2. Generar la imagen de disco unificada
+
+Pegamos ambos sectores en un único archivo binario monolítico que simula nuestro disco de arranque, rompiendo la barrera inicial de los 512 bytes:
+
+```bash
+cat boot.bin kernel.bin > nexos.img
+
+```
+
+### 3. Lanzar NeX OS en el emulador
+
+```bash
+qemu-system-x86_64 -drive format=raw,file=nexos.img
+
+```
+
+---
+
+## 🗺️ Mapa de Ruta (Roadmap)
+
+* [x] **Fase 1:** Bootloader básico de 512 bytes e impresión de caracteres vía BIOS (Modo Real).
+* [x] **Fase 2:** Romper el límite físico del sector de arranque leyendo multi-sectores desde disco (`int 0x13`).
+* [ ] **Fase 3:** Crear la GDT (Global Descriptor Table), activar el Modo Protegido de 32 bits y configurar la paginación de memoria para saltar al **Modo Largo de 64 bits**.
+* [ ] **Fase 4:** Inicializar nuestro primer Kernel en C puro de 64 bits escribiendo directo en la memoria de video (`0xB8000`).
+
+---
+
 *Hecho solo por diversión, porque tirar código a bajo nivel es lo más parecido a la magia que tenemos.*
 
 ---
+
 ⚓ [Volver a helloworld.com.ar](https://helloworld.com.ar)
