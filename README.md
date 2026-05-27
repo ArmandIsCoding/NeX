@@ -2,6 +2,8 @@
 
 > *"The people who are crazy enough to think they can change the world are the ones who do."* — Steve Jobs
 
+![NeX OS corriendo en QEMU](NeX64_running.png)
+
 **NeX** es un sistema operativo experimental, didáctico y bestialmente rápido, nacido del puro placer de programar a bajo nivel y entender el corazón de las máquinas. 
 
 Este proyecto no busca competir con los gigantes modernos, sino sentarse sobre sus hombros. Nace como un homenaje directo a la era de **NeXTSTEP** —aquel momento en la historia de la informática donde la genialidad se cocinó fuera de los márgenes establecidos— y cierra un círculo poético: ser diseñado y compilado desde la herencia directa de esa revolución, hoy materializada en la arquitectura moderna de una Mac Mini.
