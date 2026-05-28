@@ -1,19 +1,17 @@
-// Evitamos que el compilador meta funciones e inicializaciones estándar
+#include "video.h"
+
+// Le indicamos al compilador que esta función va en una sección especial al principio
+__attribute__((section(".text.main_kernel")))
 void main_kernel() {
-    // Puntero directo a la memoria de video VGA (tipo short para meter caracteres de 2 bytes)
-    unsigned short* vga_buffer = (unsigned short*)0xB8000;
+    // 1. Limpiamos la pantalla con el azul oficial de NeX
+    kclear_screen(COLOR_BLUE);
 
-    // Pintamos "Hola desde C!" un poco más abajo del "NeX 64" para ver ambos
-    // 0x1f = fondo azul, texto blanco brillante
-    char* mensaje = "Hola desde C!";
+    // 2. Imprimimos el cartel principal usando nuestra librería
+    kprint_at("NeX OS (64-bits Nativo)", 0, 0, COLOR_YELLOW, COLOR_BLUE);
     
-    // Saltamos la primera línea (80 caracteres) para no pisar el NeX 64
-    int offset = 80; 
+    // 3. Texto corrido con salto de línea
+    kprint("\nHola desde el modulo video.c!\n");
+    kprint("Esto ya se siente como un sistema operativo de verdad.");
 
-    for (int i = 0; mensaje[i] != '\0'; i++) {
-        vga_buffer[offset + i] = (0x1f << 8) | mensaje[i];
-    }
-
-    // El equivalente al jmp $ de assembly: bucle infinito en C
     while(1);
 }

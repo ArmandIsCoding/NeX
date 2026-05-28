@@ -2,6 +2,11 @@
 
 KERNEL_OFFSET equ 0x9000    ; Dirección de la RAM donde vamos a cargar el Sector 2
 
+; --- ASEGURAR SEGMENTOS A 0 ---
+xor ax, ax
+mov ds, ax
+mov es, ax
+
 mov [BOOT_DRIVE], dl        ; La BIOS nos pasa en 'dl' el número de disco de arranque. Lo guardamos.
 
 ; --- CONFIGURAR PILA (STACK) ---

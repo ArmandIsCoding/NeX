@@ -3,10 +3,11 @@ OUTPUT_FORMAT(binary)
 
 SECTIONS
 {
-    /* Vamos a acomodar el Kernel en la dirección 0x10000 (un espacio limpio en la RAM) */
     . = 0x10000;
 
     .text : {
+        /* Forzamos a que el símbolo de la función main_kernel vaya primero */
+        *(.text.main_kernel)
         *(.text)
     }
 
